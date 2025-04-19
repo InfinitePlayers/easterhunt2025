@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
-  <title>The Great DJW Egg Hunt 2025_v2</title>
-  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
+  <title>The Great DJW Egg Hunt 2025</title>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -146,25 +145,16 @@
       cursor: pointer;
       line-height: 1;
     }
-    .map-container {
+    .map-wrapper {
       width: 100%;
       height: 80vh;
-      overflow: hidden;
-      position: relative;
-      touch-action: none;
+      overflow: scroll;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-x pan-y;
     }
-    #panzoom-target {
-      display: inline-block;
-      touch-action: none;
-      transform-origin: 0 0;
-      will-change: transform;
-    }
-    #mapImage {
-      display: block;
-      width: 100%;
+    .zoomable-map {
+      width: 1494px;
       height: auto;
-      max-width: none;
-      touch-action: none;
     }
   </style>
 </head>
@@ -209,10 +199,8 @@
 
     <div id="map" class="page">
       <h2>Zoomable Map</h2>
-      <div class="map-container" id="mapContainer">
-        <div id="panzoom-target">
-          <img src="Map_v1.jpg" alt="Egg Hunt Map" id="mapImage">
-        </div>
+      <div class="map-wrapper">
+        <img src="Map_v1.jpg" alt="Egg Hunt Map" class="zoomable-map">
       </div>
     </div>
   </div>
@@ -221,20 +209,127 @@
     <source src="chicken-talk-30453.mp3" type="audio/mpeg">
   </audio>
   <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      const elem = document.getElementById('panzoom-target');
-      const panzoom = Panzoom(elem, {
-        maxScale: 5,
-        minScale: 1,
-        contain: 'outside',
-        startScale: 1
+    const targetPhrase = 'treasure is here';
+    const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
+    let basketData = JSON.parse(localStorage.getItem('eggBasketLetters') || '[]');
+    while (basketData.length < 14) basketData.push('');
+
+    const container = document.getElementById('codeContainer');
+    const words = targetPhrase.split(' ');
+    let inputIndex = 0;
+    words.forEach(word => {
+      const wordDiv = document.createElement('div');
+      wordDiv.className = 'word-group';
+      word.split('').forEach(char => {
+        const input = document.createElement('input');
+        input.maxLength = 1;
+        input.className = 'letter-box';
+        input.dataset.index = inputIndex;
+        input.dataset.expected = char;
+        input.value = storedInput[inputIndex] || '';
+        input.addEventListener('input', () => {
+          storedInput[input.dataset.index] = input.value;
+          localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+          const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
+          if (input.value && next) next.focus();
+        });
+        wordDiv.appendChild(input);
+        inputIndex++;
       });
-      const parent = document.getElementById('mapContainer');
-      parent.addEventListener('wheel', panzoom.zoomWithWheel);
-      parent.addEventListener('pointerdown', e => {
-        if (e.pointerType === 'touch') e.preventDefault();
-      });
+      container.appendChild(wordDiv);
     });
+
+    function checkCode() {
+      let correct = true;
+      document.querySelectorAll('.letter-box').forEach(input => {
+        const expected = input.dataset.expected;
+        const value = input.value.toLowerCase();
+        if (value === expected) {
+          input.classList.add('correct');
+          input.classList.remove('incorrect');
+        } else {
+          input.classList.add('incorrect');
+          input.classList.remove('correct');
+          correct = false;
+        }
+      });
+      const result = document.getElementById('result');
+      if (correct) {
+        result.style.display = 'block';
+      } else {
+        result.style.display = 'none';
+        alert("Hmm, not quite right yet. Keep going!");
+      }
+    }
+
+    function clearMainInputs() {
+      document.querySelectorAll('.letter-box').forEach(input => {
+        input.value = '';
+        delete storedInput[input.dataset.index];
+      });
+      localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+    }
+
+    function toggleAudio() {
+      const bg = document.getElementById('bgSound');
+      const btn = document.getElementById('mute-btn');
+      bg.muted = !bg.muted;
+      btn.textContent = bg.muted ? '🔇 Unmute' : '🔈 Mute';
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById('nav-' + pageId).classList.add('active');
+    }
+
+    function clearBasket() {
+      basketData = new Array(14).fill('');
+      localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+      document.querySelectorAll('.basket-input').forEach(input => input.value = '');
+    }
+
+    const leftCol = document.getElementById('leftCol');
+    const rightCol = document.getElementById('rightCol');
+
+    for (let i = 0; i < 14; i++) {
+      const row = document.createElement('div');
+      row.className = 'basket-row';
+
+      const number = document.createElement('div');
+      number.className = 'basket-number';
+      number.textContent = i + 1;
+
+      const input = document.createElement('input');
+      input.className = 'basket-input';
+      input.maxLength = 1;
+      input.type = 'text';
+      input.placeholder = '_';
+      input.value = basketData[i] || '';
+      input.addEventListener('input', () => {
+        basketData[i] = input.value.toUpperCase();
+        localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+      });
+
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'clear-btn';
+      clearBtn.textContent = '×';
+      clearBtn.title = 'Clear this letter';
+      clearBtn.addEventListener('click', () => {
+        if (confirm(`Are you sure you want to erase letter #${i + 1}?`)) {
+          input.value = '';
+          basketData[i] = '';
+          localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+        }
+      });
+
+      row.appendChild(number);
+      row.appendChild(input);
+      row.appendChild(clearBtn);
+
+      (i < 7 ? leftCol : rightCol).appendChild(row);
+    }
   </script>
 </body>
 </html>
