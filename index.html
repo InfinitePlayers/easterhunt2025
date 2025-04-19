@@ -10,23 +10,24 @@
       background: #fdf6e3;
       color: #333;
       text-align: center;
-      padding: 2rem;
+      padding: 1.5rem;
     }
     h1 {
       color: #e07b00;
-      font-size: 2.5rem;
+      font-size: 2rem;
     }
     p {
-      font-size: 1.2rem;
+      font-size: 1rem;
     }
     .letter-box {
       display: inline-block;
       width: 30px;
       height: 40px;
       border-bottom: 2px solid #333;
-      margin: 0 5px;
-      font-size: 1.5rem;
+      margin: 0 3px;
+      font-size: 1.2rem;
       text-transform: uppercase;
+      text-align: center;
     }
     .letter-box.correct {
       color: green;
@@ -37,7 +38,7 @@
       font-weight: bold;
     }
     button {
-      padding: 0.5rem 1rem;
+      padding: 0.6rem 1rem;
       font-size: 1rem;
       background: #e07b00;
       color: white;
@@ -48,7 +49,7 @@
     }
     #result {
       margin-top: 2rem;
-      font-size: 1.3rem;
+      font-size: 1.1rem;
       display: none;
     }
     img {
@@ -58,6 +59,18 @@
     }
     .code-container {
       margin-top: 1rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .chicken {
+      position: absolute;
+      top: 80%;
+      animation: run 10s linear infinite;
+    }
+    @keyframes run {
+      0% { left: -100px; }
+      100% { left: 110%; }
     }
   </style>
 </head>
@@ -77,11 +90,16 @@
     <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
   </div>
 
+  <img class="chicken" src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Chicken_cartoon_04.svg/512px-Chicken_cartoon_04.svg.png" alt="chicken" width="60" />
+
+  <audio id="winSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg"></audio>
+  <audio id="failSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/6672" type="audio/mpeg"></audio>
+
   <script>
     const targetPhrase = 'treasure is here';
     const container = document.getElementById('codeContainer');
+    const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
 
-    // Create input boxes
     targetPhrase.split('').forEach((char, index) => {
       const input = document.createElement('input');
       input.maxLength = 1;
@@ -92,13 +110,20 @@
         input.disabled = true;
         input.style.border = 'none';
         input.style.background = 'transparent';
+      } else {
+        input.value = storedInput[index] || '';
       }
+      input.addEventListener('input', () => {
+        storedInput[input.dataset.index] = input.value;
+        localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+      });
       container.appendChild(input);
     });
 
     function checkCode() {
       let correct = true;
-      document.querySelectorAll('.letter-box').forEach((input) => {
+      const inputs = document.querySelectorAll('.letter-box');
+      inputs.forEach((input) => {
         const expected = input.dataset.expected;
         const value = input.value.toLowerCase();
 
@@ -117,8 +142,10 @@
       const result = document.getElementById('result');
       if (correct) {
         result.style.display = 'block';
+        document.getElementById('winSound').play();
       } else {
         result.style.display = 'none';
+        document.getElementById('failSound').play();
         alert("Hmm, not quite right yet. Keep going!");
       }
     }
