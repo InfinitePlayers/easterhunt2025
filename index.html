@@ -6,7 +6,7 @@
   <title>The Great DJW Egg Hunt 2025</title>
   <style>
     body {
-      font-family: 'Comic Sans MS', cursive, sans-serif;
+      font-family: Arial, sans-serif;
       background: #fdf6e3;
       color: #333;
       text-align: center;
@@ -60,8 +60,14 @@
     .code-container {
       margin-top: 1rem;
       display: flex;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+    }
+    .word-group {
+      display: flex;
       justify-content: center;
+      flex-wrap: nowrap;
     }
     .chicken {
       position: absolute;
@@ -99,25 +105,37 @@
     const targetPhrase = 'treasure is here';
     const container = document.getElementById('codeContainer');
     const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
+    const words = targetPhrase.split(' ');
 
-    targetPhrase.split('').forEach((char, index) => {
-      const input = document.createElement('input');
-      input.maxLength = 1;
-      input.className = 'letter-box';
-      input.dataset.index = index;
-      input.dataset.expected = char;
-      if (char === ' ') {
-        input.disabled = true;
-        input.style.border = 'none';
-        input.style.background = 'transparent';
-      } else {
-        input.value = storedInput[index] || '';
-      }
-      input.addEventListener('input', () => {
-        storedInput[input.dataset.index] = input.value;
-        localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+    let inputIndex = 0;
+
+    words.forEach((word, wordIndex) => {
+      const wordDiv = document.createElement('div');
+      wordDiv.className = 'word-group';
+
+      word.split('').forEach((char) => {
+        const input = document.createElement('input');
+        input.maxLength = 1;
+        input.className = 'letter-box';
+        input.dataset.index = inputIndex;
+        input.dataset.expected = char;
+        input.value = storedInput[inputIndex] || '';
+
+        input.addEventListener('input', () => {
+          storedInput[input.dataset.index] = input.value;
+          localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+          // Move to next input
+          const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
+          if (input.value && next) {
+            next.focus();
+          }
+        });
+
+        wordDiv.appendChild(input);
+        inputIndex++;
       });
-      container.appendChild(input);
+
+      container.appendChild(wordDiv);
     });
 
     function checkCode() {
@@ -126,8 +144,6 @@
       inputs.forEach((input) => {
         const expected = input.dataset.expected;
         const value = input.value.toLowerCase();
-
-        if (input.disabled) return;
 
         if (value === expected) {
           input.classList.add('correct');
