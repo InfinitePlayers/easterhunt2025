@@ -86,11 +86,6 @@
       font-size: 1.1rem;
       display: none;
     }
-    img {
-      margin-top: 1rem;
-      max-width: 100%;
-      height: auto;
-    }
     .code-container {
       margin-top: 1rem;
       display: flex;
@@ -102,7 +97,6 @@
       display: flex;
       justify-content: center;
       gap: 0.2rem;
-      flex-wrap: nowrap;
     }
     .chicken {
       position: absolute;
@@ -117,44 +111,86 @@
     }
     .page { display: none; }
     .page.active { display: block; }
+    .basket-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 14px 10px;
+      margin-top: 1rem;
+    }
+    .basket-box {
+      border: 2px solid #e07b00;
+      padding: 4px;
+      font-size: 1rem;
+      height: 75px;
+      position: relative;
+      background: white;
+      border-radius: 8px;
+    }
+    .basket-input {
+      font-size: 1.2rem;
+      width: 80%;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .clear-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-links">
-      <a id="nav-main" href="#" class="active">Main Hunt</a>
+      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Main Hunt</a>
+      <a id="nav-basket" href="#" onclick="showPage('basket')">Basket</a>
     </div>
     <button id="mute-btn" onclick="toggleAudio()">🔈 Mute</button>
   </nav>
 
   <div class="container">
-    <h1>The Great DJW Egg Hunt 2025</h1>
-    <p>Welcome to the ultimate Easter adventure! 🐣</p>
-    <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
-    <p>Use the map we gave you to help find them all!</p>
-    <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
+    <div id="main" class="page active">
+      <h1>The Great DJW Egg Hunt 2025</h1>
+      <p>Welcome to the ultimate Easter adventure! 🐣</p>
+      <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
+      <p>Use the map we gave you to help find them all!</p>
+      <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
 
-    <div class="code-container" id="codeContainer"></div>
-    <button onclick="checkCode()">Reveal the Prize</button>
+      <div class="code-container" id="codeContainer"></div>
+      <button onclick="checkCode()">Reveal the Prize</button>
 
-    <div id="result">
-      <p><strong>Congratulations!</strong> 🎉</p>
-      <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
-      <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
+      <div id="result">
+        <p><strong>Congratulations!</strong> 🎉</p>
+        <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
+      </div>
+    </div>
+
+    <div id="basket" class="page">
+      <h2>Egg Basket</h2>
+      <p>Found a letter on the hunt? Type it into the correct egg box below:</p>
+      <div class="basket-grid" id="basketGrid"></div>
     </div>
   </div>
 
   <audio id="bgSound" autoplay loop preload="auto">
     <source src="chicken-talk-30453.mp3" type="audio/mpeg">
   </audio>
-  <audio id="winSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg"></audio>
-  <audio id="failSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/6672" type="audio/mpeg"></audio>
-
   <script>
     const targetPhrase = 'treasure is here';
-    const container = document.getElementById('codeContainer');
     const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
+    let basketData = JSON.parse(localStorage.getItem('eggBasketLetters') || '[]');
+    while (basketData.length < 14) basketData.push('');
 
+    const container = document.getElementById('codeContainer');
     const words = targetPhrase.split(' ');
     let inputIndex = 0;
     words.forEach(word => {
@@ -196,10 +232,8 @@
       const result = document.getElementById('result');
       if (correct) {
         result.style.display = 'block';
-        document.getElementById('winSound').play();
       } else {
         result.style.display = 'none';
-        document.getElementById('failSound').play();
         alert("Hmm, not quite right yet. Keep going!");
       }
     }
@@ -211,7 +245,43 @@
       btn.textContent = bg.muted ? '🔇 Unmute' : '🔈 Mute';
     }
 
-    // Chickens run across screen
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
+      document.getElementById('nav-' + pageId).classList.add('active');
+    }
+
+    const basketGrid = document.getElementById('basketGrid');
+    for (let i = 1; i <= 14; i++) {
+      const box = document.createElement('div');
+      box.className = 'basket-box';
+      const input = document.createElement('input');
+      input.className = 'basket-input';
+      input.maxLength = 1;
+      input.type = 'text';
+      input.placeholder = '_';
+      input.value = basketData[i - 1] || '';
+      input.addEventListener('input', () => {
+        basketData[i - 1] = input.value.toUpperCase();
+        localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+      });
+      const clearBtn = document.createElement('button');
+      clearBtn.className = 'clear-btn';
+      clearBtn.textContent = '×';
+      clearBtn.title = 'Clear this letter';
+      clearBtn.addEventListener('click', () => {
+        if (confirm(`Are you sure you want to erase letter #${i}?`)) {
+          input.value = '';
+          basketData[i - 1] = '';
+          localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+        }
+      });
+      box.appendChild(input);
+      box.appendChild(clearBtn);
+      basketGrid.appendChild(box);
+    }
+
     for (let i = 0; i < 4; i++) {
       const chicken = document.createElement('img');
       chicken.src = "chicken_01.gif";
@@ -222,12 +292,6 @@
       chicken.style.top = `${75 + Math.random() * 10}%`;
       document.body.appendChild(chicken);
     }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const bg = document.getElementById('bgSound');
-      bg.muted = false;
-      bg.play().catch(() => {});
-    });
   </script>
 </body>
 </html>
