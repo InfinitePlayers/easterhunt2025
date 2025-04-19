@@ -5,13 +5,37 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>The Great DJW Egg Hunt 2025</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
       background: #fdf6e3;
       color: #333;
+      margin: 0;
+      padding: 0;
       text-align: center;
+    }
+    nav {
+      background: #e07b00;
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: center;
+      gap: 2rem;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+    }
+    nav a {
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .container {
       padding: 1.5rem;
-      position: relative;
+      max-width: 480px;
+      margin: auto;
     }
     h1 {
       color: #e07b00;
@@ -22,10 +46,10 @@
     }
     .letter-box {
       display: inline-block;
-      width: 25px;
+      width: 24px;
       height: 35px;
       border-bottom: 2px solid #333;
-      margin: 0 2px;
+      margin: 0 1px;
       font-size: 1.1rem;
       text-transform: uppercase;
       text-align: center;
@@ -64,13 +88,12 @@
       flex-direction: column;
       align-items: center;
       gap: 0.5rem;
-      flex-wrap: wrap;
     }
     .word-group {
       display: flex;
       justify-content: center;
+      gap: 0.2rem;
       flex-wrap: nowrap;
-      gap: 0.3rem;
     }
     .chicken {
       position: absolute;
@@ -95,26 +118,53 @@
       0% { left: -100px; }
       100% { left: 110%; }
     }
+    .page {
+      display: none;
+    }
+    .page.active {
+      display: block;
+    }
+    .basket-input {
+      font-size: 1.2rem;
+      padding: 0.4rem;
+      margin-top: 1rem;
+      width: 80%;
+    }
   </style>
 </head>
 <body>
-  <h1>The Great DJW Egg Hunt 2025</h1>
-  <p>Welcome to the ultimate Easter adventure! 🐣</p>
-  <p>Your mission is to find all 16 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
-  <p>Use the map we gave you to help find them all!</p>
-  <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
+  <nav>
+    <a href="#" onclick="showPage('main')">Main Hunt</a>
+    <a href="#" onclick="showPage('basket')">Basket</a>
+  </nav>
 
-  <div class="code-container" id="codeContainer"></div>
-  <button onclick="checkCode()">Reveal the Prize</button>
+  <div class="container">
+    <div id="main" class="page active">
+      <h1>The Great DJW Egg Hunt 2025</h1>
+      <p>Welcome to the ultimate Easter adventure! 🐣</p>
+      <p>Your mission is to find all 16 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
+      <p>Use the map we gave you to help find them all!</p>
+      <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
 
-  <div id="result">
-    <p><strong>Congratulations!</strong> 🎉</p>
-    <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
-    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
+      <div class="code-container" id="codeContainer"></div>
+      <button onclick="checkCode()">Reveal the Prize</button>
+
+      <div id="result">
+        <p><strong>Congratulations!</strong> 🎉</p>
+        <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
+      </div>
+    </div>
+
+    <div id="basket" class="page">
+      <h2>Egg Basket</h2>
+      <p>Found a letter on the hunt? Type it here to keep track:</p>
+      <input type="text" id="basketInput" class="basket-input" placeholder="Type your letter here..." maxlength="1">
+      <div id="basketLetters"></div>
+    </div>
   </div>
 
   <img class="chicken" src="chicken_01.gif" alt="chicken" width="60" />
-
   <button id="mute-btn" onclick="toggleAudio()">🔈 Mute</button>
 
   <audio id="bgSound" autoplay loop preload="auto">
@@ -199,6 +249,25 @@
         btn.textContent = '🔇 Unmute';
       }
     }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+      document.getElementById(pageId).classList.add('active');
+    }
+
+    const basketInput = document.getElementById('basketInput');
+    const basketLetters = document.getElementById('basketLetters');
+    basketInput.addEventListener('input', () => {
+      const val = basketInput.value.toUpperCase();
+      if (val && /^[A-Z]$/.test(val)) {
+        const span = document.createElement('span');
+        span.textContent = val;
+        span.style.fontSize = '1.5rem';
+        span.style.margin = '0.3rem';
+        basketLetters.appendChild(span);
+        basketInput.value = '';
+      }
+    });
   </script>
 </body>
 </html>
