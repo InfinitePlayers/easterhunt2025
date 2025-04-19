@@ -98,22 +98,12 @@
       justify-content: center;
       gap: 0.2rem;
     }
-    .chicken {
-      position: absolute;
-      bottom: 10px;
-      left: -100px;
-      animation: run 20s linear infinite;
-      z-index: 1;
-    }
-    @keyframes run {
-      0% { left: -150px; }
-      100% { left: 110%; }
-    }
     .page { display: none; }
     .page.active { display: block; }
     .basket-grid {
       display: grid;
       grid-template-columns: repeat(7, 1fr);
+      grid-template-rows: repeat(2, auto);
       gap: 14px 10px;
       margin-top: 1rem;
     }
@@ -131,6 +121,7 @@
       width: 80%;
       text-align: center;
       margin-top: 1.5rem;
+      text-transform: uppercase;
     }
     .clear-btn {
       position: absolute;
@@ -311,17 +302,6 @@
       box.appendChild(input);
       box.appendChild(clearBtn);
       basketGrid.appendChild(box);
-    }
-
-    for (let i = 0; i < 4; i++) {
-      const chicken = document.createElement('img');
-      chicken.src = "chicken_01.gif";
-      chicken.alt = "chicken";
-      chicken.className = "chicken";
-      chicken.style.width = `${40 + Math.random() * 80}px`;
-      chicken.style.animationDuration = `${15 + Math.random() * 10}s`;
-      chicken.style.top = `${75 + Math.random() * 10}%`;
-      document.body.appendChild(chicken);
     }
   </script>
 </body>
