@@ -112,12 +112,11 @@
     .chicken {
       position: absolute;
       bottom: 10px;
-      left: -100px;
-      animation: run 20s linear infinite;
+      animation: run linear infinite;
       z-index: 1;
     }
     @keyframes run {
-      0% { left: -100px; }
+      0% { left: -150px; }
       100% { left: 110%; }
     }
     .page {
@@ -134,9 +133,9 @@
     }
     .basket-box {
       border: 2px solid #e07b00;
-      padding: 10px;
+      padding: 8px;
       font-size: 1.2rem;
-      height: 50px;
+      height: 60px;
       position: relative;
     }
     .basket-box span {
@@ -148,11 +147,12 @@
       color: #666;
     }
     .basket-input {
-      font-size: 1.2rem;
-      padding: 0.4rem;
-      margin-top: 1rem;
-      width: 50px;
+      font-size: 1.4rem;
+      padding: 0.2rem;
+      width: 100%;
       text-align: center;
+      border: 1px solid #ccc;
+      border-radius: 4px;
     }
   </style>
 </head>
@@ -189,8 +189,6 @@
       <div class="basket-grid" id="basketGrid"></div>
     </div>
   </div>
-
-  <img class="chicken" src="chicken_01.gif" alt="chicken" width="60" />
 
   <audio id="bgSound" autoplay loop preload="auto">
     <source src="chicken-talk-30453.mp3" type="audio/mpeg">
@@ -283,7 +281,6 @@
       document.getElementById('nav-' + pageId).classList.add('active');
     }
 
-    // Build 14 egg letter slots
     const basketGrid = document.getElementById('basketGrid');
     for (let i = 1; i <= 14; i++) {
       const box = document.createElement('div');
@@ -299,6 +296,19 @@
       box.appendChild(input);
       basketGrid.appendChild(box);
     }
+
+    // Add multiple animated chickens of varying sizes
+    const sizes = [40, 60, 80, 100, 120];
+    sizes.forEach((size, i) => {
+      const chick = document.createElement('img');
+      chick.src = 'chicken_01.gif';
+      chick.alt = 'chicken';
+      chick.className = 'chicken';
+      chick.style.width = size + 'px';
+      chick.style.animationDuration = (15 + i * 3) + 's';
+      chick.style.top = (80 + i * 10) + 'px';
+      document.body.appendChild(chick);
+    });
   </script>
 </body>
 </html>
