@@ -150,14 +150,18 @@
       width: 100%;
       height: 80vh;
       overflow: hidden;
-      touch-action: none;
       position: relative;
-    }
-    .zoom-map {
-      width: 1494px;
-      height: auto;
       touch-action: none;
+    }
+    #panzoom-target {
+      touch-action: none;
+      width: 100%;
+      height: 100%;
+    }
+    #mapImage {
       display: block;
+      width: 100%;
+      height: auto;
       max-width: none;
     }
   </style>
@@ -204,7 +208,9 @@
     <div id="map" class="page">
       <h2>Zoomable Map</h2>
       <div class="map-container" id="mapContainer">
-        <img src="Map_v1.jpg" alt="Egg Hunt Map" class="zoom-map" id="zoomableMap">
+        <div id="panzoom-target">
+          <img src="Map_v1.jpg" alt="Egg Hunt Map" id="mapImage">
+        </div>
       </div>
     </div>
   </div>
@@ -335,15 +341,14 @@
       (i < 7 ? leftCol : rightCol).appendChild(row);
     }
 
-    // Enable pinch zoom and drag for the map
-    const mapImg = document.getElementById('zoomableMap');
-    const panzoom = Panzoom(mapImg, {
+    // ✅ Panzoom setup for iOS-compatible zoom and pan
+    const elem = document.getElementById('panzoom-target');
+    const panzoom = Panzoom(elem, {
       maxScale: 5,
       minScale: 1,
-      contain: 'outside',
-      startScale: 1
+      contain: 'outside'
     });
-    mapImg.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
+    document.getElementById('mapContainer').addEventListener('wheel', panzoom.zoomWithWheel);
   </script>
 </body>
 </html>
