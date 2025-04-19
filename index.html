@@ -100,48 +100,55 @@
     }
     .page { display: none; }
     .page.active { display: block; }
-    .basket-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      grid-template-rows: repeat(2, auto);
-      gap: 14px 10px;
+
+    .basket-wrapper {
+      display: flex;
+      justify-content: center;
+      gap: 3rem;
       margin-top: 1rem;
+      flex-wrap: wrap;
     }
-    .basket-box {
-      border: 2px solid #e07b00;
-      padding: 4px;
-      font-size: 1rem;
-      height: 75px;
-      position: relative;
-      background: white;
-      border-radius: 8px;
+
+    .basket-column {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
     }
+
+    .basket-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .basket-number {
+      width: 20px;
+      text-align: right;
+      font-size: 0.9rem;
+      color: #333;
+    }
+
     .basket-input {
+      width: 40px;
+      height: 36px;
       font-size: 1.2rem;
-      width: 80%;
       text-align: center;
-      margin-top: 1.5rem;
       text-transform: uppercase;
+      border: 2px solid #e07b00;
+      border-radius: 6px;
+      background: white;
     }
+
     .clear-btn {
-      position: absolute;
-      top: 3px;
-      right: 3px;
       background: red;
       color: white;
       border: none;
       border-radius: 50%;
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       font-size: 0.9rem;
       cursor: pointer;
-    }
-    .basket-number {
-      position: absolute;
-      top: 3px;
-      left: 5px;
-      font-size: 0.7rem;
-      color: #555;
+      line-height: 1;
     }
   </style>
 </head>
@@ -176,7 +183,10 @@
     <div id="basket" class="page">
       <h2>Egg Basket</h2>
       <p>Found a letter on the hunt? Type it into the correct egg box below:</p>
-      <div class="basket-grid" id="basketGrid"></div>
+      <div class="basket-wrapper">
+        <div class="basket-column" id="leftCol"></div>
+        <div class="basket-column" id="rightCol"></div>
+      </div>
       <button onclick="clearBasket()">Clear All</button>
     </div>
   </div>
@@ -266,23 +276,25 @@
       document.querySelectorAll('.basket-input').forEach(input => input.value = '');
     }
 
-    const basketGrid = document.getElementById('basketGrid');
-    for (let i = 1; i <= 14; i++) {
-      const box = document.createElement('div');
-      box.className = 'basket-box';
+    const leftCol = document.getElementById('leftCol');
+    const rightCol = document.getElementById('rightCol');
+
+    for (let i = 0; i < 14; i++) {
+      const row = document.createElement('div');
+      row.className = 'basket-row';
 
       const number = document.createElement('div');
       number.className = 'basket-number';
-      number.textContent = i;
+      number.textContent = i + 1;
 
       const input = document.createElement('input');
       input.className = 'basket-input';
       input.maxLength = 1;
       input.type = 'text';
       input.placeholder = '_';
-      input.value = basketData[i - 1] || '';
+      input.value = basketData[i] || '';
       input.addEventListener('input', () => {
-        basketData[i - 1] = input.value.toUpperCase();
+        basketData[i] = input.value.toUpperCase();
         localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
       });
 
@@ -291,17 +303,18 @@
       clearBtn.textContent = '×';
       clearBtn.title = 'Clear this letter';
       clearBtn.addEventListener('click', () => {
-        if (confirm(`Are you sure you want to erase letter #${i}?`)) {
+        if (confirm(`Are you sure you want to erase letter #${i + 1}?`)) {
           input.value = '';
-          basketData[i - 1] = '';
+          basketData[i] = '';
           localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
         }
       });
 
-      box.appendChild(number);
-      box.appendChild(input);
-      box.appendChild(clearBtn);
-      basketGrid.appendChild(box);
+      row.appendChild(number);
+      row.appendChild(input);
+      row.appendChild(clearBtn);
+
+      (i < 7 ? leftCol : rightCol).appendChild(row);
     }
   </script>
 </body>
