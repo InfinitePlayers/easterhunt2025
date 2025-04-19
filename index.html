@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes">
   <title>The Great DJW Egg Hunt 2025</title>
+  <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@9.4.0/dist/panzoom.min.js"></script>
   <style>
     * { box-sizing: border-box; }
     body {
@@ -100,6 +101,7 @@
     }
     .page { display: none; }
     .page.active { display: block; }
+
     .basket-wrapper {
       display: flex;
       justify-content: center;
@@ -146,28 +148,26 @@
     }
     .map-container {
       width: 100%;
-      max-width: 100%;
       height: 80vh;
       overflow: hidden;
+      touch-action: none;
       position: relative;
-      cursor: grab;
-      border: 2px solid #e07b00;
     }
-    .map-container img {
+    .zoom-map {
+      width: 1494px;
+      height: auto;
+      touch-action: none;
       display: block;
       max-width: none;
-      transform-origin: 0 0;
-      user-select: none;
-      pointer-events: none;
     }
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-links">
-      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Hunt</a>
-      <a id="nav-map" href="#" onclick="showPage('map')">Map</a>
+      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Main Hunt</a>
       <a id="nav-basket" href="#" onclick="showPage('basket')">Basket</a>
+      <a id="nav-map" href="#" onclick="showPage('map')">Map</a>
     </div>
     <button id="mute-btn" onclick="toggleAudio()">🔈 Mute</button>
   </nav>
@@ -179,22 +179,16 @@
       <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
       <p>Use the map we gave you to help find them all!</p>
       <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
+
       <div class="code-container" id="codeContainer"></div>
       <button onclick="checkCode()">Reveal the Prize</button>
       <button onclick="clearMainInputs()">Clear All</button>
+
       <div id="result">
         <p><strong>Congratulations!</strong> 🎉</p>
         <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
         <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
       </div>
-    </div>
-
-    <div id="map" class="page">
-      <h2>Hunt Map</h2>
-      <div class="map-container">
-        <img src="Map_v1.jpg" id="zoom-map" alt="Egg Hunt Map" />
-      </div>
-      <button onclick="resetMapZoom()">Reset Zoom</button>
     </div>
 
     <div id="basket" class="page">
@@ -205,6 +199,13 @@
         <div class="basket-column" id="rightCol"></div>
       </div>
       <button onclick="clearBasket()">Clear All</button>
+    </div>
+
+    <div id="map" class="page">
+      <h2>Zoomable Map</h2>
+      <div class="map-container" id="mapContainer">
+        <img src="Map_v1.jpg" alt="Egg Hunt Map" class="zoom-map" id="zoomableMap">
+      </div>
     </div>
   </div>
 
@@ -257,8 +258,12 @@
         }
       });
       const result = document.getElementById('result');
-      result.style.display = correct ? 'block' : 'none';
-      if (!correct) alert("Hmm, not quite right yet. Keep going!");
+      if (correct) {
+        result.style.display = 'block';
+      } else {
+        result.style.display = 'none';
+        alert("Hmm, not quite right yet. Keep going!");
+      }
     }
 
     function clearMainInputs() {
@@ -326,54 +331,19 @@
       row.appendChild(number);
       row.appendChild(input);
       row.appendChild(clearBtn);
+
       (i < 7 ? leftCol : rightCol).appendChild(row);
     }
 
-    // Zoom + Pan Logic for Map
-    const map = document.getElementById('zoom-map');
-    let scale = 1;
-    let pos = { x: 0, y: 0 };
-    let isDragging = false;
-    let start = { x: 0, y: 0 };
-
-    map.style.transform = `translate(0px, 0px) scale(${scale})`;
-
-    map.parentElement.addEventListener('mousedown', (e) => {
-      isDragging = true;
-      start = { x: e.clientX - pos.x, y: e.clientY - pos.y };
-      map.parentElement.style.cursor = 'grabbing';
+    // Enable pinch zoom and drag for the map
+    const mapImg = document.getElementById('zoomableMap');
+    const panzoom = Panzoom(mapImg, {
+      maxScale: 5,
+      minScale: 1,
+      contain: 'outside',
+      startScale: 1
     });
-
-    map.parentElement.addEventListener('mouseup', () => {
-      isDragging = false;
-      map.parentElement.style.cursor = 'grab';
-    });
-
-    map.parentElement.addEventListener('mouseleave', () => {
-      isDragging = false;
-      map.parentElement.style.cursor = 'grab';
-    });
-
-    map.parentElement.addEventListener('mousemove', (e) => {
-      if (!isDragging) return;
-      pos.x = e.clientX - start.x;
-      pos.y = e.clientY - start.y;
-      map.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
-    });
-
-    map.parentElement.addEventListener('wheel', (e) => {
-      e.preventDefault();
-      const zoom = 0.1;
-      scale += e.deltaY < 0 ? zoom : -zoom;
-      scale = Math.min(Math.max(1, scale), 3);
-      map.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
-    });
-
-    function resetMapZoom() {
-      scale = 1;
-      pos = { x: 0, y: 0 };
-      map.style.transform = `translate(0px, 0px) scale(${scale})`;
-    }
+    mapImg.parentElement.addEventListener('wheel', panzoom.zoomWithWheel);
   </script>
 </body>
 </html>
