@@ -255,6 +255,7 @@
       });
       const result = document.getElementById('result');
       if (correct) {
+        alert('🎉 Congratulations! Your prize is under the big oak tree near the middle of the common. 🧺');
         result.style.display = 'block';
       } else {
         result.style.display = 'none';
@@ -263,11 +264,13 @@
     }
 
     function clearMainInputs() {
-      document.querySelectorAll('.letter-box').forEach(input => {
-        input.value = '';
-        delete storedInput[input.dataset.index];
-      });
-      localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+      if (confirm('Are you sure you want to clear all the code boxes?')) {
+        document.querySelectorAll('.letter-box').forEach(input => {
+          input.value = '';
+          delete storedInput[input.dataset.index];
+        });
+        localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+      }
     }
 
     function toggleAudio() {
@@ -285,9 +288,11 @@
     }
 
     function clearBasket() {
-      basketData = new Array(14).fill('');
-      localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
-      document.querySelectorAll('.basket-input').forEach(input => input.value = '');
+      if (confirm('Are you sure you want to clear all the basket entries?')) {
+        basketData = new Array(14).fill('');
+        localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+        document.querySelectorAll('.basket-input').forEach(input => input.value = '');
+      }
     }
 
     const leftCol = document.getElementById('leftCol');
