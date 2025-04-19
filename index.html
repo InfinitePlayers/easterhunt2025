@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Great DJW Egg Hunt 2025</title>
+  <style>
+    body {
+      font-family: 'Comic Sans MS', cursive, sans-serif;
+      background: #fdf6e3;
+      color: #333;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: #e07b00;
+      font-size: 2.5rem;
+    }
+    p {
+      font-size: 1.2rem;
+    }
+    input[type="text"] {
+      padding: 0.5rem;
+      font-size: 1rem;
+      margin-top: 1rem;
+      border: 2px solid #e07b00;
+      border-radius: 5px;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      background: #e07b00;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      margin-top: 1rem;
+    }
+    #result {
+      margin-top: 2rem;
+      font-size: 1.3rem;
+      display: none;
+    }
+    img {
+      margin-top: 1rem;
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <h1>The Great DJW Egg Hunt 2025</h1>
+  <p>Welcome to the ultimate Easter adventure! 🐣</p>
+  <p>Your mission is to find all 16 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
+  <p>Use the map we gave you to help find them all!</p>
+  <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
+
+  <input type="text" id="codeInput" placeholder="Enter the secret code" />
+  <br />
+  <button onclick="checkCode()">Reveal the Prize</button>
+
+  <div id="result">
+    <p><strong>Congratulations!</strong> 🎉</p>
+    <p>Your prize is hidden under the big oak tree near the middle of the common.🧺</p>
+    <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
+  </div>
+
+  <script>
+    function checkCode() {
+      const input = document.getElementById('codeInput').value.trim().toLowerCase();
+      const result = document.getElementById('result');
+
+      if (input === 'treasure is here') {
+        result.style.display = 'block';
+      } else {
+        result.style.display = 'none';
+        alert('Oops! That code isn\'t quite right. Keep hunting!');
+      }
+    }
+  </script>
+</body>
+</html>
