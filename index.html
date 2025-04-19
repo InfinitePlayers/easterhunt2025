@@ -155,53 +155,47 @@
   </style>
 </head>
 <body>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const targetPhrase = 'treasure is here';
-      const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
-      const container = document.getElementById('codeContainer');
-      const words = targetPhrase.split(' ');
-      let inputIndex = 0;
+<!-- content unchanged -->
+<script>
+// other logic unchanged...
 
-      words.forEach(word => {
-        const wordDiv = document.createElement('div');
-        wordDiv.className = 'word-group';
-        word.split('').forEach(char => {
-          const input = document.createElement('input');
-          input.maxLength = 1;
-          input.className = 'letter-box';
-          input.dataset.index = inputIndex;
-          input.dataset.expected = char;
-          input.value = storedInput[inputIndex] || '';
+words.forEach(word => {
+  const wordDiv = document.createElement('div');
+  wordDiv.className = 'word-group';
+  word.split('').forEach(char => {
+    const input = document.createElement('input');
+    input.maxLength = 1;
+    input.className = 'letter-box';
+    input.dataset.index = inputIndex;
+    input.dataset.expected = char;
+    input.value = storedInput[inputIndex] || '';
 
-          input.addEventListener('input', (e) => {
-            storedInput[input.dataset.index] = input.value;
-            localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
-            if (input.value) {
-              const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
-              if (next) next.focus();
-            }
-          });
-
-          input.addEventListener('keydown', (e) => {
-            if (e.key === 'Backspace' && !input.value) {
-              const prev = document.querySelector(`input[data-index='${parseInt(input.dataset.index) - 1}']`);
-              if (prev) prev.focus();
-            }
-          });
-
-          input.addEventListener('focus', () => {
-            const val = input.value;
-            input.value = '';
-            input.value = val;
-          });
-
-          wordDiv.appendChild(input);
-          inputIndex++;
-        });
-        container.appendChild(wordDiv);
-      });
+    input.addEventListener('input', () => {
+      storedInput[input.dataset.index] = input.value;
+      localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
+      if (input.value.length === 1) {
+        const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
+        if (next) next.focus();
+      }
     });
-  </script>
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && input.value === '') {
+        const prev = document.querySelector(`input[data-index='${parseInt(input.dataset.index) - 1}']`);
+        if (prev) prev.focus();
+      }
+    });
+
+    input.addEventListener('focus', () => {
+      input.setSelectionRange(input.value.length, input.value.length);
+    });
+
+    wordDiv.appendChild(input);
+    inputIndex++;
+  });
+  container.appendChild(wordDiv);
+});
+
+</script>
 </body>
 </html>
