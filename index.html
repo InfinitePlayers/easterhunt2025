@@ -1,333 +1,98 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>The Great DJW Egg Hunt 2025</title>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: Arial, sans-serif;
-      background: #fdf6e3;
-      color: #333;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    nav {
-      background: #e07b00;
-      color: white;
-      padding: 1rem;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      position: sticky;
-      top: 0;
-      z-index: 1000;
-    }
-    nav .nav-links {
-      display: flex;
-      gap: 1rem;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-      padding: 0.5rem 1rem;
-      border-radius: 4px;
-    }
-    nav a.active {
-      background-color: black;
-    }
-    #mute-btn {
-      background-color: black;
-      color: white;
-      padding: 0.4rem 0.8rem;
-      border: none;
-      border-radius: 5px;
-      font-size: 0.9rem;
-      cursor: pointer;
-    }
-    .container {
-      padding: 1.5rem;
-      max-width: 480px;
-      margin: auto;
-    }
-    h1, h2 {
-      color: #e07b00;
-    }
-    p {
-      font-size: 1rem;
-    }
-    .letter-box {
-      display: inline-block;
-      width: 24px;
-      height: 30px;
-      border-bottom: 2px solid #333;
-      margin: 0 1px;
-      font-size: 1rem;
-      text-transform: uppercase;
-      text-align: center;
-    }
-    .letter-box.correct { color: green; font-weight: bold; }
-    .letter-box.incorrect { color: red; font-weight: bold; }
-    button {
-      padding: 0.6rem 1rem;
-      font-size: 1rem;
-      background: #e07b00;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 1rem;
-    }
-    #result {
-      margin-top: 2rem;
-      font-size: 1.1rem;
-      display: none;
-    }
-    img {
-      margin-top: 1rem;
-      max-width: 100%;
-      height: auto;
-    }
-    .code-container {
-      margin-top: 1rem;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .word-group {
-      display: flex;
-      justify-content: center;
-      gap: 0.2rem;
-      flex-wrap: nowrap;
-    }
-    .chicken {
-      position: absolute;
-      bottom: 10px;
-      left: -100px;
-      animation: run 20s linear infinite;
-      z-index: 1;
-    }
-    @keyframes run {
-      0% { left: -150px; }
-      100% { left: 110%; }
-    }
-    .page { display: none; }
-    .page.active { display: block; }
-    .basket-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 10px;
-      margin-top: 1rem;
-    }
-    .basket-box {
-      border: 2px solid #e07b00;
-      padding: 5px;
-      font-size: 1.2rem;
-      height: 70px;
-      position: relative;
-      background: white;
-      border-radius: 8px;
-    }
-    .basket-box span {
-      position: absolute;
-      top: -10px;
-      left: 5px;
-      background: #fdf6e3;
-      font-size: 0.7rem;
-      color: #666;
-    }
-    .basket-input {
-      font-size: 1.2rem;
-      padding: 0.3rem;
-      margin-top: 0.2rem;
-      width: 90%;
-      text-align: center;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    .clear-btn {
-      position: absolute;
-      top: 3px;
-      right: 3px;
-      font-size: 0.8rem;
-      background: red;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 20px;
-      height: 20px;
-      line-height: 18px;
-      cursor: pointer;
-    }
-  </style>
-</head>
-<body>
-  <nav>
-    <div class="nav-links">
-      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Main Hunt</a>
-      <a id="nav-basket" href="#" onclick="showPage('basket')">Basket</a>
-    </div>
-    <button id="mute-btn" onclick="toggleAudio()">🔈 Mute</button>
-  </nav>
-
-  <div class="container">
-    <div id="main" class="page active">
-      <h1>The Great DJW Egg Hunt 2025</h1>
-      <p>Welcome to the ultimate Easter adventure! 🐣</p>
-      <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
-      <p>Use the map we gave you to help find them all!</p>
-      <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
-
-      <div class="code-container" id="codeContainer"></div>
-      <button onclick="checkCode()">Reveal the Prize</button>
-
-      <div id="result">
-        <p><strong>Congratulations!</strong> 🎉</p>
-        <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
-        <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
-      </div>
-    </div>
-
-    <div id="basket" class="page">
-      <h2>Egg Basket</h2>
-      <p>Found a letter on the hunt? Type it into the correct egg box below:</p>
-      <div class="basket-grid" id="basketGrid"></div>
-    </div>
-  </div>
-
-  <audio id="bgSound" autoplay loop preload="auto">
-    <source src="chicken-talk-30453.mp3" type="audio/mpeg">
-  </audio>
-  <audio id="winSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/387" type="audio/mpeg"></audio>
-  <audio id="failSound" preload="auto" src="https://www.fesliyanstudios.com/play-mp3/6672" type="audio/mpeg"></audio>
-
-  <script>
-    const targetPhrase = 'treasure is here';
-    const container = document.getElementById('codeContainer');
-    const storedInput = JSON.parse(localStorage.getItem('eggHuntInputs') || '{}');
-    let basketData = JSON.parse(localStorage.getItem('eggBasketLetters') || '[]');
-
-    while (basketData.length < 14) basketData.push('');
-    localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
-
-    const words = targetPhrase.split(' ');
-    let inputIndex = 0;
-    words.forEach(word => {
-      const wordDiv = document.createElement('div');
-      wordDiv.className = 'word-group';
-      word.split('').forEach(char => {
-        const input = document.createElement('input');
-        input.maxLength = 1;
-        input.className = 'letter-box';
-        input.dataset.index = inputIndex;
-        input.dataset.expected = char;
-        input.value = storedInput[inputIndex] || '';
-        input.addEventListener('input', () => {
-          storedInput[input.dataset.index] = input.value;
-          localStorage.setItem('eggHuntInputs', JSON.stringify(storedInput));
-          const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
-          if (input.value && next) next.focus();
-        });
-        wordDiv.appendChild(input);
-        inputIndex++;
-      });
-      container.appendChild(wordDiv);
-    });
-
-    function checkCode() {
-      let correct = true;
-      document.querySelectorAll('.letter-box').forEach(input => {
-        const expected = input.dataset.expected;
-        const value = input.value.toLowerCase();
-        if (value === expected) {
-          input.classList.add('correct');
-          input.classList.remove('incorrect');
-        } else {
-          input.classList.add('incorrect');
-          input.classList.remove('correct');
-          correct = false;
-        }
-      });
-      const result = document.getElementById('result');
-      if (correct) {
-        result.style.display = 'block';
-        document.getElementById('winSound').play();
-      } else {
-        result.style.display = 'none';
-        document.getElementById('failSound').play();
-        alert("Hmm, not quite right yet. Keep going!");
-      }
-    }
-
-    function toggleAudio() {
-      const bg = document.getElementById('bgSound');
-      const btn = document.getElementById('mute-btn');
-      bg.muted = !bg.muted;
-      btn.textContent = bg.muted ? '🔇 Unmute' : '🔈 Mute';
-    }
-
-    function showPage(pageId) {
-      document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-      document.getElementById(pageId).classList.add('active');
-      document.querySelectorAll('nav a').forEach(a => a.classList.remove('active'));
-      document.getElementById('nav-' + pageId).classList.add('active');
-    }
-
-    const basketGrid = document.getElementById('basketGrid');
-    for (let i = 1; i <= 14; i++) {
-      const box = document.createElement('div');
-      box.className = 'basket-box';
-      const label = document.createElement('span');
-      label.textContent = i;
-      const input = document.createElement('input');
-      input.className = 'basket-input';
+<style>
+  .letter-box {
+    display: inline-block;
+    width: 22px;
+    height: 28px;
+    font-size: 0.9rem;
+    border-bottom: 2px solid #333;
+    margin: 0 1px;
+    text-align: center;
+    text-transform: uppercase;
+  }
+  .code-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+  }
+  .word-group {
+    display: flex;
+    justify-content: center;
+    gap: 0.1rem;
+  }
+  .basket-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 14px 10px;
+    margin-top: 1rem;
+  }
+  .basket-box {
+    border: 2px solid #e07b00;
+    padding: 4px;
+    font-size: 1rem;
+    height: 75px;
+    position: relative;
+    background: white;
+    border-radius: 8px;
+  }
+  .basket-input {
+    font-size: 1.2rem;
+    width: 80%;
+    text-align: center;
+    margin-top: 1.5rem;
+  }
+  .clear-btn {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    background: red;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+</style>
+<script>
+  const codeContainer = document.getElementById("codeContainer");
+  const storedInput = JSON.parse(localStorage.getItem("eggHuntInputs") || "{}");
+  const phrase = "treasure is here";
+  const words = phrase.split(" ");
+  let inputIndex = 0;
+  words.forEach((word, w) => {
+    const wordDiv = document.createElement("div");
+    wordDiv.className = "word-group";
+    word.split("").forEach((char) => {
+      const input = document.createElement("input");
       input.maxLength = 1;
-      input.type = 'text';
-      input.placeholder = '_';
-      input.value = basketData[i - 1] || '';
-      input.addEventListener('input', () => {
-        basketData[i - 1] = input.value.toUpperCase();
-        localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
-      });
+      input.className = "letter-box";
+      input.dataset.index = inputIndex;
+      input.dataset.expected = char;
+      input.value = storedInput[inputIndex] || "";
 
-      const clearBtn = document.createElement('button');
-      clearBtn.className = 'clear-btn';
-      clearBtn.textContent = '×';
-      clearBtn.title = 'Clear this letter';
-      clearBtn.addEventListener('click', () => {
-        if (confirm(`Are you sure you want to erase letter #${i}?`)) {
-          input.value = '';
-          basketData[i - 1] = '';
-          localStorage.setItem('eggBasketLetters', JSON.stringify(basketData));
+      const clear = document.createElement("button");
+      clear.className = "clear-btn";
+      clear.innerText = "×";
+      clear.onclick = () => {
+        if (confirm("Clear this letter?")) {
+          input.value = "";
+          storedInput[inputIndex] = "";
+          localStorage.setItem("eggHuntInputs", JSON.stringify(storedInput));
         }
+      };
+
+      input.addEventListener("input", () => {
+        storedInput[input.dataset.index] = input.value;
+        localStorage.setItem("eggHuntInputs", JSON.stringify(storedInput));
+        const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
+        if (input.value && next) next.focus();
       });
 
-      box.appendChild(label);
-      box.appendChild(input);
-      box.appendChild(clearBtn);
-      basketGrid.appendChild(box);
-    }
-
-    for (let i = 0; i < 3; i++) {
-      const chicken = document.createElement('img');
-      chicken.src = "chicken_01.gif";
-      chicken.alt = "chicken";
-      chicken.className = "chicken";
-      chicken.style.width = `${40 + Math.random() * 80}px`;
-      chicken.style.animationDuration = `${15 + Math.random() * 10}s`;
-      chicken.style.top = `${75 + Math.random() * 10}%`;
-      document.body.appendChild(chicken);
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const bg = document.getElementById('bgSound');
-      bg.muted = false;
-      bg.play().catch(() => {});
+      wordDiv.appendChild(input);
+      inputIndex++;
     });
-  </script>
-</body>
-</html>
+    codeContainer.appendChild(wordDiv);
+  });
+</script>
