@@ -1,98 +1,133 @@
-<style>
-  .letter-box {
-    display: inline-block;
-    width: 22px;
-    height: 28px;
-    font-size: 0.9rem;
-    border-bottom: 2px solid #333;
-    margin: 0 1px;
-    text-align: center;
-    text-transform: uppercase;
-  }
-  .code-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.4rem;
-  }
-  .word-group {
-    display: flex;
-    justify-content: center;
-    gap: 0.1rem;
-  }
-  .basket-grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 14px 10px;
-    margin-top: 1rem;
-  }
-  .basket-box {
-    border: 2px solid #e07b00;
-    padding: 4px;
-    font-size: 1rem;
-    height: 75px;
-    position: relative;
-    background: white;
-    border-radius: 8px;
-  }
-  .basket-input {
-    font-size: 1.2rem;
-    width: 80%;
-    text-align: center;
-    margin-top: 1.5rem;
-  }
-  .clear-btn {
-    position: absolute;
-    top: 3px;
-    right: 3px;
-    background: red;
-    color: white;
-    border: none;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    font-size: 0.9rem;
-    cursor: pointer;
-  }
-</style>
-<script>
-  const codeContainer = document.getElementById("codeContainer");
-  const storedInput = JSON.parse(localStorage.getItem("eggHuntInputs") || "{}");
-  const phrase = "treasure is here";
-  const words = phrase.split(" ");
-  let inputIndex = 0;
-  words.forEach((word, w) => {
-    const wordDiv = document.createElement("div");
-    wordDiv.className = "word-group";
-    word.split("").forEach((char) => {
-      const input = document.createElement("input");
-      input.maxLength = 1;
-      input.className = "letter-box";
-      input.dataset.index = inputIndex;
-      input.dataset.expected = char;
-      input.value = storedInput[inputIndex] || "";
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Great DJW Egg Hunt 2025</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .letter-box {
+      display: inline-block;
+      width: 22px;
+      height: 28px;
+      font-size: 0.9rem;
+      border-bottom: 2px solid #333;
+      margin: 0 1px;
+      text-align: center;
+      text-transform: uppercase;
+    }
+    .code-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .word-group {
+      display: flex;
+      justify-content: center;
+      gap: 0.1rem;
+    }
+    .basket-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 14px 10px;
+      margin-top: 1rem;
+    }
+    .basket-box {
+      border: 2px solid #e07b00;
+      padding: 4px;
+      font-size: 1rem;
+      height: 75px;
+      position: relative;
+      background: white;
+      border-radius: 8px;
+    }
+    .basket-input {
+      font-size: 1.2rem;
+      width: 80%;
+      text-align: center;
+      margin-top: 1.5rem;
+    }
+    .clear-btn {
+      position: absolute;
+      top: 3px;
+      right: 3px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>The Great DJW Egg Hunt 2025</h1>
+    <p>Welcome to the ultimate Easter adventure! 🐣</p>
+    <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
+    <p>Use the map we gave you to help find them all!</p>
+    <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
 
-      const clear = document.createElement("button");
-      clear.className = "clear-btn";
-      clear.innerText = "×";
-      clear.onclick = () => {
-        if (confirm("Clear this letter?")) {
-          input.value = "";
-          storedInput[inputIndex] = "";
+    <div class="code-container" id="codeContainer"></div>
+    <button onclick="checkCode()">Reveal the Prize</button>
+
+    <div id="result" style="display:none;">
+      <p><strong>Congratulations!</strong> 🎉</p>
+      <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
+    </div>
+  </div>
+
+  <script>
+    const codeContainer = document.getElementById("codeContainer");
+    const storedInput = JSON.parse(localStorage.getItem("eggHuntInputs") || "{}");
+    const phrase = "treasure is here";
+    const words = phrase.split(" ");
+    let inputIndex = 0;
+
+    words.forEach((word) => {
+      const wordDiv = document.createElement("div");
+      wordDiv.className = "word-group";
+      word.split("").forEach((char) => {
+        const input = document.createElement("input");
+        input.maxLength = 1;
+        input.className = "letter-box";
+        input.dataset.index = inputIndex;
+        input.dataset.expected = char;
+        input.value = storedInput[inputIndex] || "";
+
+        input.addEventListener("input", () => {
+          storedInput[input.dataset.index] = input.value;
           localStorage.setItem("eggHuntInputs", JSON.stringify(storedInput));
-        }
-      };
+          const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
+          if (input.value && next) next.focus();
+        });
 
-      input.addEventListener("input", () => {
-        storedInput[input.dataset.index] = input.value;
-        localStorage.setItem("eggHuntInputs", JSON.stringify(storedInput));
-        const next = document.querySelector(`input[data-index='${parseInt(input.dataset.index) + 1}']`);
-        if (input.value && next) next.focus();
+        wordDiv.appendChild(input);
+        inputIndex++;
       });
-
-      wordDiv.appendChild(input);
-      inputIndex++;
+      codeContainer.appendChild(wordDiv);
     });
-    codeContainer.appendChild(wordDiv);
-  });
-</script>
+
+    function checkCode() {
+      const inputs = document.querySelectorAll('.letter-box');
+      let correct = true;
+      inputs.forEach((input) => {
+        const expected = input.dataset.expected;
+        const value = input.value.toLowerCase();
+        if (value === expected) {
+          input.classList.add("correct");
+          input.classList.remove("incorrect");
+        } else {
+          input.classList.add("incorrect");
+          input.classList.remove("correct");
+          correct = false;
+        }
+      });
+      document.getElementById("result").style.display = correct ? "block" : "none";
+    }
+  </script>
+</body>
+</html>
