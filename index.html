@@ -19,12 +19,22 @@
     p {
       font-size: 1.2rem;
     }
-    input[type="text"] {
-      padding: 0.5rem;
-      font-size: 1rem;
-      margin-top: 1rem;
-      border: 2px solid #e07b00;
-      border-radius: 5px;
+    .letter-box {
+      display: inline-block;
+      width: 30px;
+      height: 40px;
+      border-bottom: 2px solid #333;
+      margin: 0 5px;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+    }
+    .letter-box.correct {
+      color: green;
+      font-weight: bold;
+    }
+    .letter-box.incorrect {
+      color: red;
+      font-weight: bold;
     }
     button {
       padding: 0.5rem 1rem;
@@ -46,6 +56,9 @@
       max-width: 100%;
       height: auto;
     }
+    .code-container {
+      margin-top: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -55,26 +68,58 @@
   <p>Use the map we gave you to help find them all!</p>
   <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
 
-  <input type="text" id="codeInput" placeholder="Enter the secret code" />
-  <br />
+  <div class="code-container" id="codeContainer"></div>
   <button onclick="checkCode()">Reveal the Prize</button>
 
   <div id="result">
     <p><strong>Congratulations!</strong> 🎉</p>
-    <p>Your prize is hidden under the big oak tree near the middle of the common.🧺</p>
+    <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
     <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
   </div>
 
   <script>
-    function checkCode() {
-      const input = document.getElementById('codeInput').value.trim().toLowerCase();
-      const result = document.getElementById('result');
+    const targetPhrase = 'treasure is here';
+    const container = document.getElementById('codeContainer');
 
-      if (input === 'treasure is here') {
+    // Create input boxes
+    targetPhrase.split('').forEach((char, index) => {
+      const input = document.createElement('input');
+      input.maxLength = 1;
+      input.className = 'letter-box';
+      input.dataset.index = index;
+      input.dataset.expected = char;
+      if (char === ' ') {
+        input.disabled = true;
+        input.style.border = 'none';
+        input.style.background = 'transparent';
+      }
+      container.appendChild(input);
+    });
+
+    function checkCode() {
+      let correct = true;
+      document.querySelectorAll('.letter-box').forEach((input) => {
+        const expected = input.dataset.expected;
+        const value = input.value.toLowerCase();
+
+        if (input.disabled) return;
+
+        if (value === expected) {
+          input.classList.add('correct');
+          input.classList.remove('incorrect');
+        } else {
+          input.classList.add('incorrect');
+          input.classList.remove('correct');
+          correct = false;
+        }
+      });
+
+      const result = document.getElementById('result');
+      if (correct) {
         result.style.display = 'block';
       } else {
         result.style.display = 'none';
-        alert('Oops! That code isn\'t quite right. Keep hunting!');
+        alert("Hmm, not quite right yet. Keep going!");
       }
     }
   </script>
