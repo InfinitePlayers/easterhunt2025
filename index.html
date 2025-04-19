@@ -100,7 +100,6 @@
     }
     .page { display: none; }
     .page.active { display: block; }
-
     .basket-wrapper {
       display: flex;
       justify-content: center;
@@ -108,26 +107,22 @@
       margin-top: 1rem;
       flex-wrap: wrap;
     }
-
     .basket-column {
       display: flex;
       flex-direction: column;
       gap: 10px;
     }
-
     .basket-row {
       display: flex;
       align-items: center;
       gap: 8px;
     }
-
     .basket-number {
       width: 20px;
       text-align: right;
       font-size: 0.9rem;
       color: #333;
     }
-
     .basket-input {
       width: 40px;
       height: 36px;
@@ -138,7 +133,6 @@
       border-radius: 6px;
       background: white;
     }
-
     .clear-btn {
       background: red;
       color: white;
@@ -150,12 +144,29 @@
       cursor: pointer;
       line-height: 1;
     }
+    .map-container {
+      width: 100%;
+      max-width: 100%;
+      height: 80vh;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      border: 2px solid #e07b00;
+    }
+    .map-container img {
+      display: block;
+      max-width: none;
+      transform-origin: 0 0;
+      user-select: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
   <nav>
     <div class="nav-links">
-      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Main Hunt</a>
+      <a id="nav-main" href="#" class="active" onclick="showPage('main')">Hunt</a>
+      <a id="nav-map" href="#" onclick="showPage('map')">Map</a>
       <a id="nav-basket" href="#" onclick="showPage('basket')">Basket</a>
     </div>
     <button id="mute-btn" onclick="toggleAudio()">🔈 Mute</button>
@@ -168,16 +179,22 @@
       <p>Your mission is to find all 14 chicken eggs scattered around the common. Each egg has a letter – together they reveal a secret code!</p>
       <p>Use the map we gave you to help find them all!</p>
       <p>Once you've cracked the code, enter it below to find out where your prize is hidden...</p>
-
       <div class="code-container" id="codeContainer"></div>
       <button onclick="checkCode()">Reveal the Prize</button>
       <button onclick="clearMainInputs()">Clear All</button>
-
       <div id="result">
         <p><strong>Congratulations!</strong> 🎉</p>
         <p>Your prize is hidden under the big oak tree near the middle of the common. Look for the Easter basket! 🧺</p>
         <img src="https://upload.wikimedia.org/wikipedia/commons/9/99/Oak_tree_illustration.jpg" alt="Oak Tree" />
       </div>
+    </div>
+
+    <div id="map" class="page">
+      <h2>Hunt Map</h2>
+      <div class="map-container">
+        <img src="Map_v1.jpg" id="zoom-map" alt="Egg Hunt Map" />
+      </div>
+      <button onclick="resetMapZoom()">Reset Zoom</button>
     </div>
 
     <div id="basket" class="page">
@@ -240,12 +257,8 @@
         }
       });
       const result = document.getElementById('result');
-      if (correct) {
-        result.style.display = 'block';
-      } else {
-        result.style.display = 'none';
-        alert("Hmm, not quite right yet. Keep going!");
-      }
+      result.style.display = correct ? 'block' : 'none';
+      if (!correct) alert("Hmm, not quite right yet. Keep going!");
     }
 
     function clearMainInputs() {
@@ -313,8 +326,53 @@
       row.appendChild(number);
       row.appendChild(input);
       row.appendChild(clearBtn);
-
       (i < 7 ? leftCol : rightCol).appendChild(row);
+    }
+
+    // Zoom + Pan Logic for Map
+    const map = document.getElementById('zoom-map');
+    let scale = 1;
+    let pos = { x: 0, y: 0 };
+    let isDragging = false;
+    let start = { x: 0, y: 0 };
+
+    map.style.transform = `translate(0px, 0px) scale(${scale})`;
+
+    map.parentElement.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      start = { x: e.clientX - pos.x, y: e.clientY - pos.y };
+      map.parentElement.style.cursor = 'grabbing';
+    });
+
+    map.parentElement.addEventListener('mouseup', () => {
+      isDragging = false;
+      map.parentElement.style.cursor = 'grab';
+    });
+
+    map.parentElement.addEventListener('mouseleave', () => {
+      isDragging = false;
+      map.parentElement.style.cursor = 'grab';
+    });
+
+    map.parentElement.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+      pos.x = e.clientX - start.x;
+      pos.y = e.clientY - start.y;
+      map.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
+    });
+
+    map.parentElement.addEventListener('wheel', (e) => {
+      e.preventDefault();
+      const zoom = 0.1;
+      scale += e.deltaY < 0 ? zoom : -zoom;
+      scale = Math.min(Math.max(1, scale), 3);
+      map.style.transform = `translate(${pos.x}px, ${pos.y}px) scale(${scale})`;
+    });
+
+    function resetMapZoom() {
+      scale = 1;
+      pos = { x: 0, y: 0 };
+      map.style.transform = `translate(0px, 0px) scale(${scale})`;
     }
   </script>
 </body>
